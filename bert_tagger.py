@@ -301,6 +301,7 @@ def main():
         nb_test_steps, nb_test_examples = 0, 0
         wrong_list = []
 
+        op = open(os.path.join(args.output_dir, "test_pred.txt"), 'w')
         for input_ids, input_mask, segment_ids, label_ids, guids in tqdm(test_dataloader, desc="Testing"):
             input_ids = input_ids.to(device)
             input_mask = input_mask.to(device)
@@ -313,9 +314,11 @@ def main():
 
             logits = logits.detach().cpu().numpy()
             label_ids = label_ids.to('cpu').numpy()
-
-            tmp_test_correct, tmp_test_total = accuracy(logits, label_ids)
             
+            tmp_test_correct, tmp_test_total = accuracy(logits, label_ids)
+           
+            op.write(str(guids[0]) + "\t" + str(label_ids[0]) + "\t" + str(np.argmax(logits, axis=1)[0]) + "\n")
+
             assert tmp_test_total == 1
             if tmp_test_correct == 0:
                 wrong_list.append(guids[0].item())
